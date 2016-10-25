@@ -1,10 +1,12 @@
 package liferay.asm.tranformer;
 
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -20,10 +22,10 @@ public class MethodTransformer {
 	public static void main(String[] args) throws IOException {
 		MethodTransformer methodTransformer = new MethodTransformer();
 
-		methodTransformer.transform();
+		methodTransformer.transform(Paths.get("out/classes/methodtester"));
 	}
 
-	public void transform() throws IOException {
+	public void transform(Path outputPath) throws IOException {
 		InputStream in = testingMethod.class.getResourceAsStream("testingMethod.class");
 
 		ClassReader classReader = new ClassReader(in);
@@ -34,14 +36,12 @@ public class MethodTransformer {
 
 		classReader.accept(exceptionThrower, 0);
 
-		File outputDir = new File("out/classes/methodtester/");
+		Files.createDirectories(outputPath);
 
-        outputDir.mkdirs();
+		Path filePath = outputPath.resolve("testingMethod.class");
 
         DataOutputStream dataOutputStream =
-			new DataOutputStream(
-				new FileOutputStream(
-					new File(outputDir,"testingMethod.class")));
+			new DataOutputStream(new FileOutputStream(filePath.toFile()));
 
         dataOutputStream.write(classWriter.toByteArray());
 	}
